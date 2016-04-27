@@ -1238,15 +1238,16 @@ class BufferedColumnResultProxy(ResultProxy):
     def _init_metadata(self):
         super(BufferedColumnResultProxy, self)._init_metadata()
         metadata = self._metadata
-        # orig_processors will be used to preprocess each row when they are
-        # constructed.
-        metadata._orig_processors = metadata._processors
-        # replace the all type processors by None processors.
-        metadata._processors = [None for _ in range(len(metadata.keys))]
-        keymap = {}
-        for k, (func, obj, index) in metadata._keymap.items():
-            keymap[k] = (None, obj, index)
-        self._metadata._keymap = keymap
+        if not hasattr(metadata, '_orig_processors'):
+            # orig_processors will be used to preprocess each row when they are
+            # constructed.
+            metadata._orig_processors = metadata._processors
+            # replace the all type processors by None processors.
+            metadata._processors = [None for _ in range(len(metadata.keys))]
+            keymap = {}
+            for k, (func, obj, index) in metadata._keymap.items():
+                keymap[k] = (None, obj, index)
+            self._metadata._keymap = keymap
 
     def fetchall(self):
         # can't call cursor.fetchall(), since rows must be
